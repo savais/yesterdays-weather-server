@@ -8,8 +8,8 @@
     "test": "test"
   },
   "scripts": {
-    "start": "env TZ='Europe/Helsinki' node ./src/server.js",
-    "test": "mocha"
+    "start": "set NODE_ENV=dev&& node ./src/server.js",
+    "test": "set NODE_ENV=test&& mocha  --exit"
   },
   "keywords": [],
   "author": "",

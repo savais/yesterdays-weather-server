@@ -1,6 +1,8 @@
 import { assert, expect, should } from 'chai';  // Using Assert style
 import {storage} from '../src/storage.js'
 
+
+// Config test data
 let testData = {
     "tempC": [
         {

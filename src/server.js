@@ -10,7 +10,7 @@ const data = storage()
 
 
 app.get('/', (req, res) => {
-  res.send('Hello World!')
+  res.sendStatus(200);
 })
 
 /**
@@ -50,11 +50,11 @@ app.get('/city', (req, res) => {
   })
 
 /**
- * endpoint /city/today
+ * endpoint /today
  * @params string : name of the city
  * @returns json : weather data for today
  */
-app.get('/city/today', (req, res) => {
+app.get('/today', (req, res) => {
   const city = req.query.city.toLowerCase();
 
   if(city == null) {
@@ -86,11 +86,11 @@ app.get('/city/today', (req, res) => {
   })
   
   /**
-   * endpoint /city/yesterday
+   * endpoint /yesterday
    * @params string : name of the city
    * @returns json : weather data for yesterday
    */
-app.get('/city/yesterday', (req, res) => {
+app.get('/yesterday', (req, res) => {
   const city = req.query.city.toLowerCase();
 
   if(city == null) {
@@ -122,11 +122,11 @@ app.get('/city/yesterday', (req, res) => {
   })
 
   /**
-   * endpoint /city/daybefore
+   * endpoint /daybefore
    * @param {string} city
    * @returns {json} weather data for the day before
    */
-app.get('/city/daybefore', (req, res) => {
+app.get('/daybefore', (req, res) => {
   const city = req.query.city.toLowerCase();
 
   if(city == null) {
@@ -158,17 +158,19 @@ app.get('/city/daybefore', (req, res) => {
   })
 
 
-app.listen(port, async () => {
-  console.log(`Weather api listening on port ${port}`)
-  let eventDate;
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(port, async () => {
+    console.log(`Weather api listening on port ${port}`)
+    let eventDate;
 
-  while(true) {
-    UpdateEverything();
-    eventDate = new Date().zeroHours().addHours(25);
-    console.log("Forecast update scheduled for " + eventDate)
-    await sleepUntil(eventDate)
-  }
-})
+    while(true) {
+      UpdateEverything();
+      eventDate = new Date().zeroHours().addHours(25);
+      console.log("Forecast update scheduled for " + eventDate)
+      await sleepUntil(eventDate)
+    }
+  })
+}
 
 
 /**
@@ -182,31 +184,48 @@ const UpdateEverything = () => {
   data.rollForwards();
   let cities = data.getCities()
 
-  if(cities.length < 5) {
+  // Don't use top100 if running in test or dev enviroment
+  if(process.env.NODE_ENV === 'test') {
+
+    console.log("Test enviroment detected, using single city list")
+    cities = ['Helsinki']
+
+  } else {
+
+    if(cities.length < 5 && process.env.NODE_ENV !== 'dev') {
     console.log("Citylist too short - Using top100 list instead.")
     cities = top100cities;
-  } else {
-    console.log(cities + " " + cities.length)
+    
+    } else {
+      cities = ["Helsinki",  "Espoo",  "Tampere",  "Vantaa",  "Oulu",  "Turku",  "Jyväskylä",  "Kuopio",  "Lahti",  "Pori"]
+    }
   }
+
 
   GetForecastAll(new Date(), cities).then(results => {
     for (const [key, value] of Object.entries(results)) {
+
       if(data.today.get(key) === undefined) {
         data.today.add(key, value)
       } else {
         data.today.update(key, value)
       }
     }
+
+    console.log('Forecast updates done.')
   });
 
   GetObservationAll(new Date().addHours(-24), cities).then(results => {
     for (const [key, value] of Object.entries(results)) {
+
       if(data.yesterday.get(key) === undefined) {
         data.yesterday.add(key, value)
       } else {
         data.yesterday.update(key, value)
       }
     }
+
+    console.log('Observation updates done.')
   });
 
   
@@ -245,3 +264,6 @@ const top100cities = ["Helsinki",  "Espoo",  "Tampere",  "Vantaa",  "Oulu",  "Tu
     "Forssa",  "Akaa",  "Janakkala",  "Orimattila",  "Loimaa",  "Uusikaupunki",  "Ylivieska",  "Kauhava",  "Kuusamo",  "Parainen",  "Kontiolahti",  
     "Loviisa",  "Lapua",  "Kauhajoki",  "Ulvila",  "Kankaanpää",  "Kalajoki",  "Ilmajoki",  "Liperi",  "Maarianhamina",  "Eura",  "Alavus",  
     "Pedersören kunta",  "Paimio",  "Lieksa",  "Muurame",  "Nivala",  "Sotkamo",  "Kauniainen",  "Hämeenkyrö",  "Liminka",  "Ii",  "Kitee",  "Huittinen" ]
+
+
+export {app}  // TODO: check whether or not this is bad practice / risky

@@ -25,7 +25,7 @@ describe('EzFMIO', () => {
 
     describe('GetForecast(city, date)', () => {
         it('should return forecast for the city for the given date', () => {
-            return GetForecast('Helsinki ', foreTestDate).then(results => {
+            return GetForecast('Helsinki', foreTestDate).then(results => {
                 expect(results).to.be.a('object');
                 expect(results.tempC).to.have.lengthOf(24)
 

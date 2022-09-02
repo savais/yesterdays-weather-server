@@ -10,17 +10,6 @@ const storage = () => {
             "add": (city, data) => {
                 city = city.toLowerCase();
                 dataStorage.citys[city] = {...dataStorage.citys[city],"today": data};
-
-                if(dataStorage.yesterday.get(city) === undefined)
-                {
-                    dataStorage.citys[city].yesterday = {}
-                }
-
-                if(dataStorage.daybefore.get(city) === undefined)
-                {
-                    dataStorage.citys[city].daybefore = {}
-                }
-
             },
             
             /**
@@ -46,7 +35,8 @@ const storage = () => {
             "get" : (city) => {
                 // console.log("get " + city + " today")
                 city = city.toLowerCase();
-                if(dataStorage.citys[city] == undefined){
+
+                if(isEmpty(dataStorage.citys[city])){
                     return undefined;
                 }
 
@@ -63,17 +53,6 @@ const storage = () => {
             "add": (city, data) => {
                 city = city.toLowerCase();
                 dataStorage.citys[city] = {...dataStorage.citys[city],"yesterday": data};
-
-                if(dataStorage.today.get(city) === undefined)
-                {
-                    dataStorage.citys[city].today = {}
-                }
-
-                if(dataStorage.daybefore.get(city) === undefined)
-                {
-                    dataStorage.citys[city].daybefore = {}
-                }
-
             },
             
             /**
@@ -99,7 +78,7 @@ const storage = () => {
             "get" : (city) => {
                 city = city.toLowerCase();
                 // console.log("get " + city + " yesterday")
-                if(dataStorage.citys[city] == undefined){
+                if(isEmpty(dataStorage.citys[city])){
                     return undefined;
                 }
                 return dataStorage.citys[city].yesterday;
@@ -115,16 +94,6 @@ const storage = () => {
             "add": (city, data) => {
                 city = city.toLowerCase();
                 dataStorage.citys[city] = {...dataStorage.citys[city],"daybefore": data};
-
-                if(dataStorage.today.get(city) === undefined)
-                {
-                    dataStorage.citys[city].today = {}
-                }
-
-                if(dataStorage.yesterday.get(city) === undefined)
-                {
-                    dataStorage.citys[city].yesterday = {}
-                }
             },
             
             /**
@@ -150,7 +119,7 @@ const storage = () => {
             "get" : (city) => {
                 city = city.toLowerCase();
                 // console.log("get " + city + " day before")
-                if(dataStorage.citys[city] == undefined){
+                if(isEmpty(dataStorage.citys[city])){
                     return undefined;
                 }
                 return dataStorage.citys[city].daybefore;
@@ -160,8 +129,16 @@ const storage = () => {
 
         "rollForwards" : () => {
             for(const [key, value] of Object.entries(dataStorage.citys)) {
-                dataStorage.citys[key].daybefore = dataStorage.citys[key].yesterday;
-                dataStorage.citys[key].yesterday = dataStorage.citys[key].today;
+
+                if(dataStorage.citys[key].yesterday !== undefined)
+                {
+                    dataStorage.citys[key].daybefore = dataStorage.citys[key].yesterday;
+                }
+                
+                if( dataStorage.citys[key].today !== undefined){
+                    dataStorage.citys[key].yesterday = dataStorage.citys[key].today;
+                }
+
                 delete dataStorage.citys[key].today;
             }
         },
@@ -180,6 +157,16 @@ const storage = () => {
     
 }
 
-
-
 export {storage}
+
+
+
+/// helpers
+const isEmpty = (obj) => {
+
+    if(typeof(obj) === 'object'){
+        return Object.keys(obj).length === 0;
+    }
+
+    return true;
+}
