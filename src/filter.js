@@ -17,7 +17,12 @@ const filterDay = (day) => {
                 break;
 
             case 'totalCloudCoverage':
-                    
+                if(!('cloudCoverage' in result)) {
+                    result['cloudCoverage'] = filterClouds(value.map(e => {
+                        return {...e, 'value': normalizeClouds(e.value)}
+                    }))
+                }
+                break;
 
             case 'cloudCoverage':
                 result[key] = filterClouds(value);
@@ -37,6 +42,8 @@ const filterDay = (day) => {
         }
 
     }
+
+    return result;
 }
 
 
@@ -151,8 +158,6 @@ const getMean = (arr) => {
 
 const getMode = (arr) => {
     let modeArr = arr.map((e) => {return arr.filter(elm => e===elm).length})
-
-
 
     return arr[modeArr.indexOf(Math.max(...modeArr))]
 }
