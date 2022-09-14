@@ -2,7 +2,7 @@ import { assert, expect, should } from 'chai';  // Using Assert style
 import fetch from 'node-fetch';
 import {app} from '../src/server.js';
 const port = 3000;
-const baseurl = `http://localhost:${port}/api/`
+const baseurl = `http://localhost:${port}/api/`;
 let server;
 
 describe('REST testing', () => {
@@ -24,9 +24,9 @@ describe('REST testing', () => {
         expect(body).to.have.all.keys(['today', 'yesterday', 'daybefore']);
 
         Object.keys(body).forEach((key) => {
-            expect(body[key]).to.have.any.keys(['tempC', 'windSpeed', 'windDirection', 'cloudCoverage', 'rain_1h'])
-        })
-    })
+            expect(body[key]).to.have.any.keys(['tempC', 'windSpeed', 'windDirection', 'cloudCoverage', 'rain_1h']);
+        });
+    });
 
     it('GET /api/:city/today - should return forecast', async () => {
         const res = await fetch(baseurl+"helsinki/today");
@@ -35,8 +35,8 @@ describe('REST testing', () => {
 
         expect(body.tempC[0]).to.be.a('object');
         expect(body.tempC[0].value).to.be.within(-40, 40);
-        expect(new Date(body.tempC[0].time)).to.be.within(new Date().zeroHours(), new Date())
-    })
+        expect(new Date(body.tempC[0].time)).to.be.within(new Date().zeroHours(), new Date());
+    });
 
     it('GET /api/:city/yesterday - should return forecast', async () => {
         const res = await fetch(baseurl+"helsinki/yesterday");
@@ -45,8 +45,8 @@ describe('REST testing', () => {
 
         expect(body.tempC[0]).to.be.a('object');
         expect(body.tempC[0].value).to.be.within(-40, 40);
-        expect(new Date(body.tempC[0].time)).to.deep.equal(new Date().zeroHours().addHours(-24))
-    })
+        expect(new Date(body.tempC[0].time)).to.deep.equal(new Date().zeroHours().addHours(-24));
+    });
 
     it('GET /api/:city/daybefore - should return forecast', async () => {
         const res = await fetch(baseurl+"helsinki/daybefore");
@@ -55,8 +55,8 @@ describe('REST testing', () => {
 
         expect(body.tempC[0]).to.be.a('object');
         expect(body.tempC[0].value).to.be.within(-40, 40);
-        expect(new Date(body.tempC[0].time)).to.deep.equal(new Date().zeroHours().addHours(-48))
-    })
+        expect(new Date(body.tempC[0].time)).to.deep.equal(new Date().zeroHours().addHours(-48));
+    });
 
     after('Close the server', () => {
         server.close();
@@ -68,7 +68,7 @@ describe('REST testing', () => {
 Date.prototype.addHours = function(h) {
     this.setTime(this.getTime() + (h*60*60*1000));
     return this;
-  }
+  };
 
   Date.prototype.zeroHours = function() {
     this.setHours(0);
@@ -77,4 +77,4 @@ Date.prototype.addHours = function(h) {
     this.setMilliseconds(0);
   
     return this;
-  }
+  };

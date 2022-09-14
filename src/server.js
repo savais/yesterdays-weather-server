@@ -1,18 +1,18 @@
 import { GetObservation, GetForecast, GetForecastAll, GetObservationAll } from "./ezfmio/ezfmio.js";
-import { storage } from "./storage.js"
+import { storage } from "./storage.js";
 import { filterDay } from "./filter.js";
 
-import express from "express"
+import express from "express";
 
-const app = express()
-const port = 3000
+const app = express();
+const port = 3000;
 
-const data = storage()
+const data = storage();
 
 
 app.get('/api/', (req, res) => {
   res.sendStatus(200);
-})
+});
 
 /**
  * endpoint /city
@@ -27,43 +27,43 @@ app.get('/api/:city', async (req, res) => {
     return;
   } 
 
-  let result = {} 
+  let result = {};
 
   // Fetch data if not in storage/cache
   if(data.today.get(city) === undefined){
     try {
-      let day = await GetForecast(city, new Date())
-      data.today.add(city, day)
+      let day = await GetForecast(city, new Date());
+      data.today.add(city, day);
     } catch(err) {
-      throw err
+      throw err;
     }
   }
 
   if(data.yesterday.get(city) === undefined){
     try {
-      let day = await GetObservation(city, new Date().addHours(-24))
-      data.yesterday.add(city, day)
+      let day = await GetObservation(city, new Date().addHours(-24));
+      data.yesterday.add(city, day);
     } catch(err) {
-      throw err
+      throw err;
     }
   }
 
   if(data.daybefore.get(city) === undefined){
     try {
-      let day = await GetObservation(city, new Date().addHours(-48))
-      data.daybefore.add(city, day)
+      let day = await GetObservation(city, new Date().addHours(-48));
+      data.daybefore.add(city, day);
     } catch(err) {
-      throw err
+      throw err;
     }
   }
   
-  result['today'] = filterDay(data.today.get(city));
-  result['yesterday'] = filterDay(data.yesterday.get(city));
-  result['daybefore'] = filterDay(data.daybefore.get(city));
+  result.today = filterDay(data.today.get(city));
+  result.yesterday = filterDay(data.yesterday.get(city));
+  result.daybefore = filterDay(data.daybefore.get(city));
 
   res.setHeader('Content-Type', 'application/json');
-  res.send(result)
-  })
+  res.send(result);
+  });
 
 /**
  * endpoint /today
@@ -94,9 +94,9 @@ app.get('/api/:city/today', (req, res) => {
     });
   } else {
     res.setHeader('Content-Type', 'application/json');
-    res.send(result)
+    res.send(result);
   }
-  })
+  });
   
   /**
    * endpoint /yesterday
@@ -127,9 +127,9 @@ app.get('/api/:city/yesterday', (req, res) => {
     });
   } else {
     res.setHeader('Content-Type', 'application/json');
-    res.send(result)
+    res.send(result);
   }
-  })
+  });
 
   /**
    * endpoint /daybefore
@@ -160,23 +160,23 @@ app.get('/api/:city/daybefore', (req, res) => {
     });
   } else {
     res.setHeader('Content-Type', 'application/json');
-    res.send(result)
+    res.send(result);
   }
-  })
+  });
 
 
 if (process.env.NODE_ENV !== 'test') {
   app.listen(port, async () => {
-    console.log(`Weather api listening on port ${port}`)
+    console.log(`Weather api listening on port ${port}`);
     let eventDate;
 
     while(true) {
       UpdateEverything();
       eventDate = new Date().zeroHours().addHours(25);
-      console.log("Forecast update scheduled for " + eventDate)
-      await sleepUntil(eventDate)
+      console.log("Forecast update scheduled for " + eventDate);
+      await sleepUntil(eventDate);
     }
-  })
+  });
 }
 
 
@@ -185,25 +185,25 @@ if (process.env.NODE_ENV !== 'test') {
  *  Fetches new forecasts and observations for every stored city
  */
 const UpdateEverything = () => {
-  console.log('Beginning to UpdateEverything()')
+  console.log('Beginning to UpdateEverything()');
 
   data.rollForwards();
-  let cities = data.getCities()
+  let cities = data.getCities();
 
   // Don't use top100 if running in test or dev enviroment
   if(process.env.NODE_ENV === 'test') {
 
-    console.log("Test enviroment detected, using single city list")
-    cities = ['Helsinki']
+    console.log("Test enviroment detected, using single city list");
+    cities = ['Helsinki'];
 
   } else {
 
     if(cities.length < 5 && process.env.NODE_ENV !== 'dev') {
-    console.log("Citylist too short - Using top100 list instead.")
+    console.log("Citylist too short - Using top100 list instead.");
     cities = top100cities;
     
     } else {
-      cities = ["Helsinki",  "Espoo",  "Tampere",  "Vantaa",  "Oulu",  "Turku",  "Jyväskylä",  "Kuopio",  "Lahti",  "Pori"]
+      cities = ["Helsinki",  "Espoo",  "Tampere",  "Vantaa",  "Oulu",  "Turku",  "Jyväskylä",  "Kuopio",  "Lahti",  "Pori"];
     }
   }
 
@@ -212,30 +212,28 @@ const UpdateEverything = () => {
     for (const [key, value] of Object.entries(results)) {
 
       if(data.today.get(key) === undefined) {
-        data.today.add(key, value)
+        data.today.add(key, value);
       } else {
-        data.today.update(key, value)
+        data.today.update(key, value);
       }
     }
 
-    console.log('Forecast updates done.')
+    console.log('Forecast updates done.');
   });
 
   GetObservationAll(new Date().addHours(-24), cities).then(results => {
     for (const [key, value] of Object.entries(results)) {
 
       if(data.yesterday.get(key) === undefined) {
-        data.yesterday.add(key, value)
+        data.yesterday.add(key, value);
       } else {
-        data.yesterday.update(key, value)
+        data.yesterday.update(key, value);
       }
     }
 
-    console.log('Observation updates done.')
+    console.log('Observation updates done.');
   });
-
-  
-}
+};
 
 
 
@@ -243,7 +241,7 @@ const UpdateEverything = () => {
 Date.prototype.addHours = function(h) {
   this.setTime(this.getTime() + (h*60*60*1000));
   return this;
-}
+};
 
 Date.prototype.zeroHours = function() {
   this.setHours(0);
@@ -252,12 +250,12 @@ Date.prototype.zeroHours = function() {
   this.setMilliseconds(0);
 
   return this;
-}
+};
 
 let sleepUntil = eventDate => new Promise(resolve => {
   let msDiff = eventDate - new Date();
   // console.log(msDiff)
-  setTimeout(resolve, msDiff)
+  setTimeout(resolve, msDiff);
 });
 
 // top100 by population
@@ -269,7 +267,7 @@ const top100cities = ["Helsinki",  "Espoo",  "Tampere",  "Vantaa",  "Oulu",  "Tu
     "Kemi",  "Jämsä",  "Hamina",  "Mustasaari",  "Naantali",  "Kempele",  "Pietarsaari",  "Laukaa",  "Äänekoski",  "Heinola",  "Pieksämäki",  
     "Forssa",  "Akaa",  "Janakkala",  "Orimattila",  "Loimaa",  "Uusikaupunki",  "Ylivieska",  "Kauhava",  "Kuusamo",  "Parainen",  "Kontiolahti",  
     "Loviisa",  "Lapua",  "Kauhajoki",  "Ulvila",  "Kankaanpää",  "Kalajoki",  "Ilmajoki",  "Liperi",  "Maarianhamina",  "Eura",  "Alavus",  
-    "Pedersören kunta",  "Paimio",  "Lieksa",  "Muurame",  "Nivala",  "Sotkamo",  "Kauniainen",  "Hämeenkyrö",  "Liminka",  "Ii",  "Kitee",  "Huittinen" ]
+    "Pedersören kunta",  "Paimio",  "Lieksa",  "Muurame",  "Nivala",  "Sotkamo",  "Kauniainen",  "Hämeenkyrö",  "Liminka",  "Ii",  "Kitee",  "Huittinen" ];
 
 
-export {app}  // TODO: check whether or not this is bad practice / risky
+export {app};  // TODO: check whether or not this is bad practice / risky

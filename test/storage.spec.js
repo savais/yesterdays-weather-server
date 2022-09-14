@@ -1,5 +1,5 @@
 import { assert, expect, should } from 'chai';  // Using Assert style
-import {storage} from '../src/storage.js'
+import {storage} from '../src/storage.js';
 
 
 // Config test data
@@ -24,7 +24,7 @@ let testData = {
         "value": 82
         },
     ]
-}
+};
 
 let testData2 = {
     "tempC": [
@@ -47,7 +47,7 @@ let testData2 = {
         "value": 11
         },
     ]
-}
+};
 
 
 describe('Storage', () => {
@@ -56,76 +56,74 @@ describe('Storage', () => {
         let dataStorage = storage();
 
             it('Add() data and then get() data', () => {
-                dataStorage.today.add("test", testData)
+                dataStorage.today.add("test", testData);
 
                 expect(dataStorage.today.get("test")).to.deep.equal(testData);
-            })
+            });
 
             it('Update() data and then get() data', () => {
-                dataStorage.today.update("test", testData2)
+                dataStorage.today.update("test", testData2);
 
                 expect(dataStorage.today.get("test")).to.deep.equal(testData2);
-            })
+            });
 
             it('Destroy() and then try to get()', () => {
-                expect(dataStorage.today.get("test")).to.not.be.a('undefined')
+                expect(dataStorage.today.get("test")).to.not.be.a('undefined');
 
-                dataStorage.today.destroy("test")
+                dataStorage.today.destroy("test");
 
-                expect(dataStorage.today.get("test")).to.be.a('undefined')
-            })
-
-    })
+                expect(dataStorage.today.get("test")).to.be.a('undefined');
+            });
+    });
 
     describe('yesterday', () => {
         let dataStorage = storage();
 
             it('Add() data and then get() data', () => {
-                dataStorage.yesterday.add("test", testData)
+                dataStorage.yesterday.add("test", testData);
 
                 expect(dataStorage.yesterday.get("test")).to.deep.equal(testData);
-            })
+            });
 
             it('Update() data and then get() data', () => {
-                dataStorage.yesterday.update("test", testData2)
+                dataStorage.yesterday.update("test", testData2);
 
                 expect(dataStorage.yesterday.get("test")).to.deep.equal(testData2);
-            })
+            });
 
             it('Destroy() and then try to get()', () => {
-                expect(dataStorage.yesterday.get("test")).to.not.be.a('undefined')
+                expect(dataStorage.yesterday.get("test")).to.not.be.a('undefined');
 
-                dataStorage.yesterday.destroy("test")
+                dataStorage.yesterday.destroy("test");
 
-                expect(dataStorage.yesterday.get("test")).to.be.a('undefined')
-            })
-
-    })
+                expect(dataStorage.yesterday.get("test")).to.be.a('undefined');
+            });
+    });
 
     describe('daybefore', () => {
         let dataStorage = storage();
 
             it('Add() data and then get() data', () => {
-                dataStorage.daybefore.add("test", testData)
+                dataStorage.daybefore.add("test", testData);
 
                 expect(dataStorage.daybefore.get("test")).to.deep.equal(testData);
-            })
+            });
 
             it('Update() data and then get() data', () => {
-                dataStorage.daybefore.update("test", testData2)
+                dataStorage.daybefore.update("test", testData2);
 
                 expect(dataStorage.daybefore.get("test")).to.deep.equal(testData2);
-            })
+            });
 
             it('Destroy() and then try to get()', () => {
-                expect(dataStorage.daybefore.get("test")).to.not.be.a('undefined')
+                expect(dataStorage.daybefore.get("test")).to.not.be.a('undefined');
 
-                dataStorage.daybefore.destroy("test")
+                dataStorage.daybefore.destroy("test");
 
-                expect(dataStorage.daybefore.get("test")).to.be.a('undefined')
-            })
+                expect(dataStorage.daybefore.get("test")).to.be.a('undefined');
+            });
 
-    })
+    });
 
     describe('rollForwards', () => {
         let dataStorage = storage();
@@ -140,6 +138,6 @@ describe('Storage', () => {
             expect(dataStorage.yesterday.get('test')).to.deep.equal(testData2);
             expect(dataStorage.today.get('test')).to.be.a('undefined');
 
-        })
-    })
-})
+        });
+    });
+});

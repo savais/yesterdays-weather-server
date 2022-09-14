@@ -155,9 +155,9 @@ const storage = () => {
     return dataStorage;
     
     
-}
+};
 
-export {storage}
+export {storage};
 
 
 
@@ -169,4 +169,4 @@ const isEmpty = (obj) => {
     }
 
     return true;
-}
+};

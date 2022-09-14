@@ -1276,7 +1276,7 @@ const testData = {
         "value": 0
       }
     ]
-  }
+  };
 
 
 describe('Filter.js', () => {
@@ -1284,41 +1284,41 @@ describe('Filter.js', () => {
         it('Should return only relevant bits of data', () => {
             let result;
 
-            result = filterDay(testData)
+            result = filterDay(testData);
 
-            expect(result).to.not.be.a('undefined')
-            expect(result).to.include.all.keys('tempC', 'windSpeed', 'windDirection', 'cloudCoverage', 'rain_1h')
+            expect(result).to.not.be.a('undefined');
+            expect(result).to.include.all.keys('tempC', 'windSpeed', 'windDirection', 'cloudCoverage', 'rain_1h');
             
-            expect(result.tempC).to.include.all.keys('mean', 'min', 'max')
-            expect(result.tempC.max).to.be.above(result.tempC.min)
-            expect(result.tempC.mean).to.be.above(result.tempC.min)
+            expect(result.tempC).to.include.all.keys('mean', 'min', 'max');
+            expect(result.tempC.max).to.be.above(result.tempC.min);
+            expect(result.tempC.mean).to.be.above(result.tempC.min);
 
-            expect(result.windSpeed).to.include.all.keys('mean', 'min', 'max')
-            expect(result.windSpeed.max).to.be.above(result.windSpeed.min)
-            expect(result.windSpeed.mean).to.be.above(result.windSpeed.min)
+            expect(result.windSpeed).to.include.all.keys('mean', 'min', 'max');
+            expect(result.windSpeed.max).to.be.above(result.windSpeed.min);
+            expect(result.windSpeed.mean).to.be.above(result.windSpeed.min);
 
-            expect(result.windDirection).to.include.all.keys('mode')
-            expect(result.windDirection.mode).to.be.within(0,7)
+            expect(result.windDirection).to.include.all.keys('mode');
+            expect(result.windDirection.mode).to.be.within(0,7);
 
-            expect(result.cloudCoverage).to.include.all.keys('mean', 'mode')
-            expect(result.cloudCoverage.mean).to.be.within(0,8)
-            expect(result.cloudCoverage.mode).to.be.within(0,8)
+            expect(result.cloudCoverage).to.include.all.keys('mean', 'mode');
+            expect(result.cloudCoverage.mean).to.be.within(0,8);
+            expect(result.cloudCoverage.mode).to.be.within(0,8);
 
-            expect(result.rain_1h).to.include.all.keys('mean', 'max', 'total')
-            expect(result.rain_1h.total).to.be.least(result.rain_1h.max)
-            expect(result.rain_1h.mean).to.be.most(result.rain_1h.max)
-        })
-    })
+            expect(result.rain_1h).to.include.all.keys('mean', 'max', 'total');
+            expect(result.rain_1h.total).to.be.least(result.rain_1h.max);
+            expect(result.rain_1h.mean).to.be.most(result.rain_1h.max);
+        });
+    });
 
 
     describe('getMode()', () => {
         it('Should return mode of an array of numbers', () => {
-            let numbers = [1,2,3,3,3,5]
+            let numbers = [1,2,3,3,3,5];
 
-            expect(getMode(numbers)).to.equal(3)
+            expect(getMode(numbers)).to.equal(3);
 
-        })
-    })
+        });
+    });
 
     describe('filterWindDirection()', () => {
         it('Should return a number between 1-8', () => {
@@ -1419,13 +1419,13 @@ describe('Filter.js', () => {
                   "time": new Date("2022-09-04T20:00:00.000Z"),
                   "value": 25
                 }
-              ]
+              ];
 
-            let result = filterWindDirection(testData)
+            let result = filterWindDirection(testData);
 
-            expect(result.mode).to.be.within(0,8)
-        })
-    })
+            expect(result.mode).to.be.within(0,8);
+        });
+    });
 
     describe('filterRain()', () => {
         it('Should return an object with (max, mean, total) rain fall.', () => {
@@ -1444,14 +1444,13 @@ describe('Filter.js', () => {
               {
                 "time": new Date("2022-09-04T12:00:00.000Z"),
                 "value": 10
-            }]
+            }];
 
-            let result = filterRain(testData)
+            let result = filterRain(testData);
 
-            expect(result).to.be.a('object')
-            expect(result.mean).to.be.below(result.max)
-            expect(result.total).to.be.at.least(result.max)
-        })
-
-    })
-})
+            expect(result).to.be.a('object');
+            expect(result.mean).to.be.below(result.max);
+            expect(result.total).to.be.at.least(result.max);
+        });
+    });
+});

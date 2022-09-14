@@ -51,7 +51,7 @@ const idTable = {
     "mts-1-1-RadiationSWAccumulation" : "radiationSWAccumulation",
     "mts-1-1-Visibility" : "visibility",
     "mts-1-1-WindGust" : "windGust"
-}
+};
 
 
 
@@ -72,13 +72,13 @@ const GetObservation = async (city, eventDate) => {
     const body = await response.text();
 
     let results = {};
-    let omResults
+    let omResults;
 
     // capture only om:results
     do
     {
         // console.log("enter do-while ")
-        omResults = reOmResult.exec(body)
+        omResults = reOmResult.exec(body);
         if(omResults != null){
 
             
@@ -86,18 +86,18 @@ const GetObservation = async (city, eventDate) => {
             if(!reNaN.test(omResults))
             {
                 // console.log("enter if - " + reGmlId.exec(omResults))
-                results[idTable[reGmlId.exec(omResults)]] = new String(omResults).match(reWml2Measurement).map(x => {
-                    return {"time":new Date(x.match(reWml2Time)), "value": Number(x.match(reWml2Value)) }
+                results[idTable[reGmlId.exec(omResults)]] = String(omResults).match(reWml2Measurement).map(x => {
+                    return {"time":new Date(x.match(reWml2Time)), "value": Number(x.match(reWml2Value)) };
                 });
             }
         }
 
 
-    } while (omResults)
+    } while (omResults);
 
     // console.log(JSON.stringify(results))
-    return results
-}
+    return results;
+};
 
 /**
  * GetForecast
@@ -116,27 +116,27 @@ const GetForecast = async (city, eventDate) => {
     const body = await response.text();
 
     let results = {};
-    let omResults
+    let omResults;
 
     // capture only om:results
     do
     {
         // console.log("enter do-while")
-        omResults = reOmResult.exec(body)
+        omResults = reOmResult.exec(body); 
         if(omResults != null){
 
             
             // Filter NaN's out of the final results
-            results[idTable[reGmlId.exec(omResults)]] = new String(omResults).match(reWml2Measurement).filter(n => !reNaN.test(n)).map(x => {
-                return {"time":new Date(x.match(reWml2Time)), "value": Number(x.match(reWml2Value)) }
+            results[idTable[reGmlId.exec(omResults)]] = String(omResults).match(reWml2Measurement).filter(n => !reNaN.test(n)).map(x => {
+                return {"time":new Date(x.match(reWml2Time)), "value": Number(x.match(reWml2Value)) };
             });
         }
 
 
-    } while (omResults)
+    } while (omResults);
 
-    return results
-}
+    return results;
+};
 
 /**
  * GetForecastAll
@@ -155,8 +155,8 @@ const GetForecast = async (city, eventDate) => {
         results[cities[i]] = await GetForecast(cities[i], eventDate);
     }
 
-    return results
-}
+    return results;
+};
 
 /**
  * GetObservationAll
@@ -175,102 +175,14 @@ const GetForecast = async (city, eventDate) => {
         results[cities[i]] = await GetObservation(cities[i], eventDate);
     }
 
-    return results
-}
-
-
-
-
-
-
-/**
- * GetCityToday
- * @params string : name of the city
- * @returns json : simple weather data for the city
- */
-const GetCityToday = async (city, options) => {
-    const response = await fetch(simpleCityQueryString(city));
-    const body = await response.text();
-
-
-    let arr = [];
-
-    var parser = new xml2js.Parser()
-    try {
-        const result = await parser.parseStringPromise(body)
-        result["wfs:FeatureCollection"]["wfs:member"].forEach(element => {
-            if(element["BsWfs:BsWfsElement"][0]["BsWfs:ParameterValue"][0] != "NaN")
-                arr.push({"timestamp": element["BsWfs:BsWfsElement"][0]["BsWfs:Time"][0], "parameter":element["BsWfs:BsWfsElement"][0]["BsWfs:ParameterName"][0], "value":element["BsWfs:BsWfsElement"][0]["BsWfs:ParameterValue"][0]})
-        });
-        return arr;
-    } catch (err) {
-        console.log(err);
-        throw err;
-    }
-}
-
-/**
- * GetCityYesterday
- * @params string : name of the city
- * @returns json : yesterdays simple weather data for the city
- */
-const GetCityYesterday = async (city, options) => {
-
-    const response = await fetch(simpleTimeRangeCityQueryString(city, yesterday(), today()));
-    const body = await response.text();
-
-    // console.log(simpleTimeRangeCityQueryString(city, yesterday(), today()));
-
-    let arr = [];
-
-    var parser = new xml2js.Parser()
-    try {
-        const result = await parser.parseStringPromise(body)
-        result["wfs:FeatureCollection"]["wfs:member"].forEach(element => {
-            if(element["BsWfs:BsWfsElement"][0]["BsWfs:ParameterValue"][0] != "NaN")
-                arr.push({"timestamp": element["BsWfs:BsWfsElement"][0]["BsWfs:Time"][0], "parameter":element["BsWfs:BsWfsElement"][0]["BsWfs:ParameterName"][0], "value":element["BsWfs:BsWfsElement"][0]["BsWfs:ParameterValue"][0]})
-        });
-        return arr;
-    } catch (err) {
-        console.log(err);
-        throw err;
-    }
-}
-
-/**
- * GetCityDaybefore
- * @params string : name of the city
- * @returns json : The day before yesterdays simple weather data for the city
- */
-const GetCityDayBefore = async (city, options) => {
-
-    const response = await fetch(simpleTimeRangeCityQueryString(city, daybefore(), yesterday()));
-    const body = await response.text();
-
-    // console.log(simpleTimeRangeCityQueryString(city, yesterday(), today()));
-
-    let arr = [];
-
-    var parser = new xml2js.Parser()
-    try {
-        const result = await parser.parseStringPromise(body)
-        result["wfs:FeatureCollection"]["wfs:member"].forEach(element => {
-            if(element["BsWfs:BsWfsElement"][0]["BsWfs:ParameterValue"][0] != "NaN")
-                arr.push({"timestamp": element["BsWfs:BsWfsElement"][0]["BsWfs:Time"][0], "parameter":element["BsWfs:BsWfsElement"][0]["BsWfs:ParameterName"][0], "value":element["BsWfs:BsWfsElement"][0]["BsWfs:ParameterValue"][0]})
-        });
-        return arr;
-    } catch (err) {
-        console.log(err);
-        throw err;
-    }
-}
-
+    return results;
+};
 
 // Helpers
 Date.prototype.addHours = function(h) {
     this.setTime(this.getTime() + (h*60*60*1000));
     return this;
-  }
+  };
 
 Date.prototype.zeroHours = function() {
     this.setHours(0);
@@ -279,34 +191,7 @@ Date.prototype.zeroHours = function() {
     this.setMilliseconds(0);
   
     return this;
-  }
-
-const today = () => {
-    let d = zeroDate(new Date())
-
-    return d.toISOString();
-}
-
-const yesterday = () => {
-    let d = zeroDate(new Date())
-
-    d.addHours(-24)
-    return d.toISOString();
-}
-
-const daybefore = () => {
-    let d = zeroDate(new Date())
-
-    d.addHours(-48)
-    return d.toISOString();
-}
-
-const tomorrow = () => {
-    let d = zeroDate(new Date())
-
-    d.addHours(24)
-    return d.toISOString();
-}
+  };
 
 const zeroDate = (d) => {
     d.setHours(0);
@@ -315,11 +200,11 @@ const zeroDate = (d) => {
     d.setMilliseconds(0);
 
     return d;
-}
+};
 
 let sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-export {GetObservation, GetObservationAll, GetForecast, GetForecastAll, GetCityToday, GetCityYesterday, GetCityDayBefore};
+export { GetObservation, GetObservationAll, GetForecast, GetForecastAll };
 
 
 

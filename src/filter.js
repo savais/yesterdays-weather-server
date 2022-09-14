@@ -2,7 +2,7 @@
 
 
 
-const paramList = ['tempC', 'windSpeed', 'windDirection', 'cloudCoverage', 'totalCloudCoverage', 'rain_1h']
+const paramList = ['tempC', 'windSpeed', 'windDirection', 'cloudCoverage', 'totalCloudCoverage', 'rain_1h'];
 
 
 
@@ -18,9 +18,9 @@ const filterDay = (day) => {
 
             case 'totalCloudCoverage':
                 if(!('cloudCoverage' in result)) {
-                    result['cloudCoverage'] = filterClouds(value.map(e => {
-                        return {...e, 'value': normalizeClouds(e.value)}
-                    }))
+                    result.cloudCoverage = filterClouds(value.map(e => {
+                        return {...e, 'value': normalizeClouds(e.value)};
+                    }));
                 }
                 break;
 
@@ -44,7 +44,7 @@ const filterDay = (day) => {
     }
 
     return result;
-}
+};
 
 
 
@@ -56,11 +56,11 @@ const filterDay = (day) => {
 const filterLinearValue = (arr) => {
     let result;
 
-    result = {...getMinMax(arr.map(e => e.value))}
-    result['mean'] = getMean(getDaytime(arr, 10, 20).map(e => e.value))
+    result = {...getMinMax(arr.map(e => e.value))};
+    result.mean = getMean(getDaytime(arr, 10, 20).map(e => e.value));
 
-    return result
-}
+    return result;
+};
 
 /**
  * filterWindDirection : boils down directional number (0-360) to 0-7 (wind directions: N, NE, E...)
@@ -70,12 +70,12 @@ const filterLinearValue = (arr) => {
 const filterWindDirection = (arr) => {
     let result = {};
 
-    arr = getDaytime(arr,10,20).map(e => {return normalizeWindDirection(e.value)})
+    arr = getDaytime(arr,10,20).map(e => {return normalizeWindDirection(e.value);});
     
-    result['mode'] = getMode(arr)
+    result.mode = getMode(arr);
 
-    return result
-}
+    return result;
+};
 
 /**
  * filterRain : takes in a days worth of datapoints in an array, processes them down to few numbers.
@@ -85,22 +85,22 @@ const filterWindDirection = (arr) => {
 const filterRain = (arr) => {
     let result = {};
 
-    result['mean'] = getMean(getDaytime(arr, 10, 20).map(e => e.value))
-    result['max'] = Math.max(...getDaytime(arr, 10, 20).map(e => e.value))
-    result['total'] = getSum(arr.map(e => e.value))
+    result.mean = getMean(getDaytime(arr, 10, 20).map(e => e.value));
+    result.max = Math.max(...getDaytime(arr, 10, 20).map(e => e.value));
+    result.total = getSum(arr.map(e => e.value));
 
     return result;
-}
+};
 
 
 const filterClouds = (arr) => {
     let result = {};
 
-    result['mean'] = getMean(getDaytime(arr, 10, 20).map(e => e.value))
-    result['mode'] = getMode(getDaytime(arr, 10, 20).map(e => e.value))
+    result.mean = getMean(getDaytime(arr, 10, 20).map(e => e.value));
+    result.mode = getMode(getDaytime(arr, 10, 20).map(e => e.value));
 
     return result;
-}
+};
 
 
 /**
@@ -111,19 +111,19 @@ const filterClouds = (arr) => {
  * @returns {array} an array of datapoints between the given hours
  */
  const getDaytime = (arr, start, stop) => {
-    let startDate = new Date(arr[0].time.getTime()).zeroHours().addHours(start)
-    let stopDate = new Date(arr[0].time.getTime()).zeroHours().addHours(stop)
+    let startDate = new Date(arr[0].time.getTime()).zeroHours().addHours(start);
+    let stopDate = new Date(arr[0].time.getTime()).zeroHours().addHours(stop);
 
-    return arr.filter(e => (e.time >= startDate && e.time <= stopDate))
-}
+    return arr.filter(e => (e.time >= startDate && e.time <= stopDate));
+};
 
 
-const normalizeClouds = (x) => {return Math.round((8)*(x/100))}
+const normalizeClouds = (x) => {return Math.round((8)*(x/100));};
 
 const normalizeWindDirection = (x) => {
-    let n = Math.round((8)*(x/360))
-    return n === 8 ? 0 : n
-    }
+    let n = Math.round((8)*(x/360));
+    return n === 8 ? 0 : n;
+    };
 
 
 
@@ -132,7 +132,7 @@ const normalizeWindDirection = (x) => {
 Date.prototype.addHours = function(h) {
     this.setTime(this.getTime() + (h*60*60*1000));
     return this;
-  }
+  };
   
 Date.prototype.zeroHours = function() {
     this.setHours(0);
@@ -141,42 +141,42 @@ Date.prototype.zeroHours = function() {
     this.setMilliseconds(0);
 
     return this;
-}
+};
 
 
 const getMinMax = (arr) => {
 
-    let min = Math.min(...arr)
-    let max = Math.max(...arr)
+    let min = Math.min(...arr);
+    let max = Math.max(...arr);
 
-    return {'min': min, 'max': max}
-}
+    return {'min': min, 'max': max};
+};
 
 
 const getMean = (arr) => {
     let sum = 0;
 
-    arr.forEach(e => sum+=e)
+    arr.forEach(e => sum+=e);
 
-    return roundTo(sum/arr.length)
-}
+    return roundTo(sum/arr.length);
+};
 
 const getMode = (arr) => {
-    let modeArr = arr.map((e) => {return arr.filter(elm => e===elm).length})
+    let modeArr = arr.map((e) => {return arr.filter(elm => e===elm).length;});
 
-    return arr[modeArr.indexOf(Math.max(...modeArr))]
-}
+    return arr[modeArr.indexOf(Math.max(...modeArr))];
+};
 
 const getSum = (arr) => {
     let sum = 0;
-    arr.forEach(e => {sum += e})
+    arr.forEach(e => {sum += e;});
 
     return sum;
-}
+};
 
 const roundTo = (n) => {
-    return Math.round(n * 10) / 10
-}
+    return Math.round(n * 10) / 10;
+};
 
 
-export { filterDay, filterRain, filterWindDirection, getMode}
+export { filterDay, filterRain, filterWindDirection, getMode };
