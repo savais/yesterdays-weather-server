@@ -9,10 +9,10 @@ const paramList = ['tempC', 'windSpeed', 'windDirection', 'cloudCoverage', 'tota
 const filterDay = (day) => {
     let result = {};
 
-    for (const [key, value] in day) {
+    for (const [key, value] of Object.entries(day)) {
         switch (key) {
             
-            case 'rain_1h':
+            case "rain_1h":
                 result[key] = filterRain(value);
                 break;
 
@@ -65,14 +65,16 @@ const filterLinearValue = (arr) => {
 /**
  * filterWindDirection : boils down directional number (0-360) to 0-7 (wind directions: N, NE, E...)
  * @param {array} arr array of datapoints {'time': <dateobject>, 'value': <measurement>}
- * @returns 
+ * @returns {object}
  */
 const filterWindDirection = (arr) => {
+    let result = {};
 
-    let daytimeArr = getDaytime(arr, 10, 20)
-    arr = daytimeArr.map(e => {return normalizeWindDirection(e.value)})
+    arr = getDaytime(arr,10,20).map(e => {return normalizeWindDirection(e.value)})
+    
+    result['mode'] = getMode(arr)
 
-    return getMode(arr)
+    return result
 }
 
 /**
@@ -144,7 +146,10 @@ Date.prototype.zeroHours = function() {
 
 const getMinMax = (arr) => {
 
-    return {'min': Math.min(arr), 'max': Math.max(arr) }
+    let min = Math.min(...arr)
+    let max = Math.max(...arr)
+
+    return {'min': min, 'max': max}
 }
 
 
@@ -153,7 +158,7 @@ const getMean = (arr) => {
 
     arr.forEach(e => sum+=e)
 
-    return sum/arr.length
+    return roundTo(sum/arr.length)
 }
 
 const getMode = (arr) => {
@@ -167,6 +172,10 @@ const getSum = (arr) => {
     arr.forEach(e => {sum += e})
 
     return sum;
+}
+
+const roundTo = (n) => {
+    return Math.round(n * 10) / 10
 }
 
 

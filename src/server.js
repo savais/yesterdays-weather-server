@@ -1,5 +1,6 @@
-import {GetObservation, GetForecast, GetForecastAll, GetObservationAll} from "./ezfmio/ezfmio.js";
-import {storage} from "./storage.js"
+import { GetObservation, GetForecast, GetForecastAll, GetObservationAll } from "./ezfmio/ezfmio.js";
+import { storage } from "./storage.js"
+import { filterDay } from "./filter.js";
 
 import express from "express"
 
@@ -9,53 +10,68 @@ const port = 3000
 const data = storage()
 
 
-app.get('/', (req, res) => {
+app.get('/api/', (req, res) => {
   res.sendStatus(200);
 })
 
 /**
  * endpoint /city
- * @params string : name of the city
- * @returns json : returns todays forecast and observations for yesterday and the day before.
+ * @param {string} city : name of the city
+ * @returns {json} : returns todays forecast and observations for yesterday and the day before.
  */
-app.get('/city', (req, res) => {
-  const city = req.query.city;
+app.get('/api/:city', async (req, res) => {
+  const city = req.params.city;
 
   if(city == null) {
     res.sendStatus(400);
     return;
   } 
 
-  let result = data.today.get(city);
+  let result = {} 
 
-  if(result == undefined){ 
-    console.log(-1)
-
-    GetCity(city).then(arr => {
-      data.today.add(city, arr);
-
-      res.setHeader('Content-Type', 'application/json');
-      res.send(JSON.stringify(arr));
-      // console.log(arr);
-      
-    }).catch(err => {
-      console.log("error: " + err);
-      res.sendStatus(500);
-    });
-  } else {
-    console.log("else")
-    res.setHeader('Content-Type', 'application/json');
-    res.send(result)
+  // Fetch data if not in storage/cache
+  if(data.today.get(city) === undefined){
+    try {
+      let day = await GetForecast(city, new Date())
+      data.today.add(city, day)
+    } catch(err) {
+      throw err
+    }
   }
+
+  if(data.yesterday.get(city) === undefined){
+    try {
+      let day = await GetObservation(city, new Date().addHours(-24))
+      data.yesterday.add(city, day)
+    } catch(err) {
+      throw err
+    }
+  }
+
+  if(data.daybefore.get(city) === undefined){
+    try {
+      let day = await GetObservation(city, new Date().addHours(-48))
+      data.daybefore.add(city, day)
+    } catch(err) {
+      throw err
+    }
+  }
+  
+  result['today'] = filterDay(data.today.get(city));
+  result['yesterday'] = filterDay(data.yesterday.get(city));
+  result['daybefore'] = filterDay(data.daybefore.get(city));
+
+  res.setHeader('Content-Type', 'application/json');
+  res.send(result)
   })
 
 /**
  * endpoint /today
- * @params string : name of the city
- * @returns json : weather data for today
+ * @param {string} city : name of the city
+ * @returns {json} : weather data for today
  */
-app.get('/today', (req, res) => {
-  const city = req.query.city.toLowerCase();
+app.get('/api/:city/today', (req, res) => {
+  const city = req.params.city.toLowerCase();
 
   if(city == null) {
     res.sendStatus(400);
@@ -65,21 +81,18 @@ app.get('/today', (req, res) => {
   let result = data.today.get(city);
 
   if(result == undefined){ 
-    // console.log(-1)
 
     GetForecast(city, new Date()).then(arr => {
       data.today.add(city, arr);
 
       res.setHeader('Content-Type', 'application/json');
       res.send(JSON.stringify(arr));
-      // console.log(arr);
       
     }).catch(err => {
       console.log("error: " + err);
       res.sendStatus(500);
     });
   } else {
-    // console.log("else")
     res.setHeader('Content-Type', 'application/json');
     res.send(result)
   }
@@ -87,11 +100,11 @@ app.get('/today', (req, res) => {
   
   /**
    * endpoint /yesterday
-   * @params string : name of the city
-   * @returns json : weather data for yesterday
+   * @param {string} city : name of the city
+   * @returns {json} : weather data for yesterday
    */
-app.get('/yesterday', (req, res) => {
-  const city = req.query.city.toLowerCase();
+app.get('/api/:city/yesterday', (req, res) => {
+  const city = req.params.city.toLowerCase();
 
   if(city == null) {
     res.sendStatus(400);
@@ -101,21 +114,18 @@ app.get('/yesterday', (req, res) => {
   let result = data.yesterday.get(city);
 
   if(result == undefined){ 
-    // console.log(-1)
 
     GetObservation(city, new Date().addHours(-24)).then(arr => {
       data.yesterday.add(city, arr);
 
       res.setHeader('Content-Type', 'application/json');
       res.send(JSON.stringify(arr));
-      // console.log(arr);
       
     }).catch(err => {
       console.log("error: " + err);
       res.sendStatus(500);
     });
   } else {
-    // console.log("else")
     res.setHeader('Content-Type', 'application/json');
     res.send(result)
   }
@@ -124,10 +134,10 @@ app.get('/yesterday', (req, res) => {
   /**
    * endpoint /daybefore
    * @param {string} city
-   * @returns {json} weather data for the day before
+   * @returns {json} : weather data for the day before
    */
-app.get('/daybefore', (req, res) => {
-  const city = req.query.city.toLowerCase();
+app.get('/api/:city/daybefore', (req, res) => {
+  const city = req.params.city.toLowerCase();
 
   if(city == null) {
     res.sendStatus(400);
@@ -137,21 +147,18 @@ app.get('/daybefore', (req, res) => {
   let result = data.daybefore.get(city);
 
   if(result == undefined){ 
-    // console.log(-1)
 
     GetObservation(city, new Date().addHours(-48)).then(arr => {
       data.daybefore.add(city, arr);
 
       res.setHeader('Content-Type', 'application/json');
       res.send(JSON.stringify(arr));
-      // console.log(arr);
       
     }).catch(err => {
       console.log("error: " + err);
       res.sendStatus(500);
     });
   } else {
-    // console.log("else")
     res.setHeader('Content-Type', 'application/json');
     res.send(result)
   }
@@ -175,8 +182,7 @@ if (process.env.NODE_ENV !== 'test') {
 
 /**
  * UpdateEverything
- * @param {none}
- * @returns 
+ *  Fetches new forecasts and observations for every stored city
  */
 const UpdateEverything = () => {
   console.log('Beginning to UpdateEverything()')

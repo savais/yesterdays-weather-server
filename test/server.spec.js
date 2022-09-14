@@ -2,7 +2,7 @@ import { assert, expect, should } from 'chai';  // Using Assert style
 import fetch from 'node-fetch';
 import {app} from '../src/server.js';
 const port = 3000;
-const baseurl = `http://localhost:${port}/`
+const baseurl = `http://localhost:${port}/api/`
 let server;
 
 describe('REST testing', () => {
@@ -11,13 +11,25 @@ describe('REST testing', () => {
     });
 
 
-    it('GET / - Should return 200', async () => {
+    it('GET /api/ - Should return 200', async () => {
         const res = await fetch(baseurl);
         expect(res.status).to.equal(200);
     });
 
-    it('GET /today - should return forecast', async () => {
-        const res = await fetch(baseurl+"today?city=helsinki");
+    it('GET /api/:city - should return processed weather data for {today, yesterday, daybefore}', async () => {
+        const res = await fetch(baseurl+"helsinki");
+        expect(res.status).to.equal(200);
+        const body = await res.json();
+
+        expect(body).to.have.all.keys(['today', 'yesterday', 'daybefore']);
+
+        Object.keys(body).forEach((key) => {
+            expect(body[key]).to.have.any.keys(['tempC', 'windSpeed', 'windDirection', 'cloudCoverage', 'rain_1h'])
+        })
+    })
+
+    it('GET /api/:city/today - should return forecast', async () => {
+        const res = await fetch(baseurl+"helsinki/today");
         expect(res.status).to.equal(200);
         const body = await res.json();
 
@@ -26,8 +38,8 @@ describe('REST testing', () => {
         expect(new Date(body.tempC[0].time)).to.be.within(new Date().zeroHours(), new Date())
     })
 
-    it('GET /yesterday - should return forecast', async () => {
-        const res = await fetch(baseurl+"yesterday?city=helsinki");
+    it('GET /api/:city/yesterday - should return forecast', async () => {
+        const res = await fetch(baseurl+"helsinki/yesterday");
         expect(res.status).to.equal(200);
         const body = await res.json();
 
@@ -36,8 +48,8 @@ describe('REST testing', () => {
         expect(new Date(body.tempC[0].time)).to.deep.equal(new Date().zeroHours().addHours(-24))
     })
 
-    it('GET /daybefore - should return forecast', async () => {
-        const res = await fetch(baseurl+"daybefore?city=helsinki");
+    it('GET /api/:city/daybefore - should return forecast', async () => {
+        const res = await fetch(baseurl+"helsinki/daybefore");
         expect(res.status).to.equal(200);
         const body = await res.json();
 
