@@ -2,17 +2,38 @@ import { GetObservation, GetForecast, GetForecastAll, GetObservationAll } from "
 import { storage } from "./storage.js";
 import { filterDay } from "./filter.js";
 
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 import express from "express";
+import cors from "cors";
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT;
 
 const data = storage();
 
+// var corsOptions = {
+//   methods: 'GET'
+// };
+
+
+app.use(cors());
 
 app.get('/api/', (req, res) => {
   res.sendStatus(200);
 });
+
+/**
+ * endpoint /cities
+ * @returns {array} : returns all currently known cities.
+ */
+app.get('/api/cities', async (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(data.getCities());
+});
+
+
 
 /**
  * endpoint /city
@@ -33,6 +54,10 @@ app.get('/api/:city', async (req, res) => {
   if(data.today.get(city) === undefined){
     try {
       let day = await GetForecast(city, new Date());
+      if(Object.keys(day).length === 0) {
+        res.sendStatus(404);
+        return;
+      }
       data.today.add(city, day);
     } catch(err) {
       throw err;
@@ -83,6 +108,11 @@ app.get('/api/:city/today', (req, res) => {
   if(result == undefined){ 
 
     GetForecast(city, new Date()).then(arr => {
+      if(Object.keys(arr).length === 0) {
+        res.sendStatus(404);
+        return;
+      }
+      
       data.today.add(city, arr);
 
       res.setHeader('Content-Type', 'application/json');
@@ -116,6 +146,10 @@ app.get('/api/:city/yesterday', (req, res) => {
   if(result == undefined){ 
 
     GetObservation(city, new Date().addHours(-24)).then(arr => {
+      if(Object.keys(arr).length === 0) {
+        res.sendStatus(404);
+        return;
+      }
       data.yesterday.add(city, arr);
 
       res.setHeader('Content-Type', 'application/json');
@@ -149,6 +183,9 @@ app.get('/api/:city/daybefore', (req, res) => {
   if(result == undefined){ 
 
     GetObservation(city, new Date().addHours(-48)).then(arr => {
+      if(Object.keys(arr).length === 0) {
+        res.sendStatus(404);
+      }
       data.daybefore.add(city, arr);
 
       res.setHeader('Content-Type', 'application/json');

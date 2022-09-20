@@ -2,7 +2,7 @@
 
 
 
-const paramList = ['tempC', 'windSpeed', 'windDirection', 'cloudCoverage', 'totalCloudCoverage', 'rain_1h'];
+const paramList = ['tempC', 'windSpeed', 'windDirection', 'cloudCoverage', 'totalCloudCover', 'rain_1h'];
 
 
 
@@ -16,7 +16,7 @@ const filterDay = (day) => {
                 result[key] = filterRain(value);
                 break;
 
-            case 'totalCloudCoverage':
+            case 'totalCloudCover':
                 if(!('cloudCoverage' in result)) {
                     result.cloudCoverage = filterClouds(value.map(e => {
                         return {...e, 'value': normalizeClouds(e.value)};
@@ -87,7 +87,7 @@ const filterRain = (arr) => {
 
     result.mean = getMean(getDaytime(arr, 10, 20).map(e => e.value));
     result.max = Math.max(...getDaytime(arr, 10, 20).map(e => e.value));
-    result.total = getSum(arr.map(e => e.value));
+    result.total = roundTo(getSum(arr.map(e => e.value)));
 
     return result;
 };

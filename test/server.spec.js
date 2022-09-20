@@ -1,8 +1,10 @@
 import { assert, expect, should } from 'chai';  // Using Assert style
 import fetch from 'node-fetch';
 import {app} from '../src/server.js';
-const port = 3000;
-const baseurl = `http://localhost:${port}/api/`;
+import * as dotenv from 'dotenv';
+dotenv.config();
+const port = process.env.PORT;
+const baseurl = `${process.env.PROTOCOL}://${process.env.HOST}:${port}/api/`;
 let server;
 
 describe('REST testing', () => {
