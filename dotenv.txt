@@ -1,0 +1,5 @@
+PROTOCOL= ##{http / https} only tested with http so far.
+PORT= ##{desired port}
+
+### host for unittests, usually localhost
+HOST= localhost
